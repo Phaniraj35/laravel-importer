@@ -1,0 +1,17 @@
+{
+    "name": "ladybird/import",
+    "require": {
+        "league/csv": "^9.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ladybird\\import\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Phaniraj35",
+            "email": "phaniitng@gmail.com"
+        }
+    ]
+}
