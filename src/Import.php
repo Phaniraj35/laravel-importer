@@ -1,12 +1,9 @@
 <?php namespace Ladybird\import;
 
-use League\Csv\Writer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Ladybird\import\Dbseed;
-use Ladybird\import\Jobs\DoImport;
 use Validator;
 
 class Import implements ImportInterface
@@ -58,7 +55,7 @@ class Import implements ImportInterface
 
         
 
-        //$csv_data = $data[0];
+        
         $db_cols = $this->getDbCols();
 
         $returnArray['csv_sample_row'] = $data[0];
@@ -110,25 +107,7 @@ class Import implements ImportInterface
         $db_cols = $this->getDbCols();
     
 
-        // $validityCheckRows = $final_json_array[0];
-
-        
-
-        // $validator = Validator::make($validityCheckRows,$this->model->rules);
-
-        // if($validator->fails()) {
-        //     return $validator->messages()->getMessages();
-        // } else {
-            
-            
-        //     foreach(array_chunk($final_json_array,1000) as $t) {
-        //         $this->model::insert($t);
-        //     }
-    
-        //     return ["message" => "Successfully Inserted"];
-
-        // }
-       // $i=0;
+ 
         foreach(array_chunk($final_json_array,1000) as $t) {
             
             for($i=0;$i<1000;$i++) {
