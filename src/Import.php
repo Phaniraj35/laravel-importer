@@ -5,16 +5,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Ladybird\import\Dbseed;
+use Ladybird\import\Jobs\DoImport;
+use Validator;
 
 class Import implements ImportInterface
 {
     protected $model;
+
+    protected $rules;
     
     public static $saved_file = "file.json";
 
     public function __construct(Model $model)
     {
         $this->model = $model;
+        
     }
 
     public function getDbCols()
@@ -66,17 +72,17 @@ class Import implements ImportInterface
 
     public function processImport(Request $request)
     {
+        
+
         $tempArray = array();
         $final_json_array = array();
         $temp_file_contents = Storage::disk('local')->get(static::$saved_file);
         $temp_file_contents = json_decode($temp_file_contents,true);
-        //Storage::disk('local')->delete(static::$saved_file);
-        //dd($temp_file_contents);
-        //dd($request->fields);
+        
 
         
 
-
+        $headers = array();
 
         foreach($temp_file_contents as $row) {
 
@@ -84,30 +90,65 @@ class Import implements ImportInterface
 
                 $tempArray[$value] = $row[$key];
 
+                
+                
+
             } //foreach inner
 
             ksort($tempArray);
+
+            if(empty($headers))
+                $headers = array_keys($tempArray);
+
             array_push($final_json_array,$tempArray);
             $tempArray = array();
 
         } //foreach
 
+        //dd($final_json_array);
+
+        $db_cols = $this->getDbCols();
+    
+
+        // $validityCheckRows = $final_json_array[0];
+
         
-        $csv = Writer::createFromString('');
 
-        $csv->insertAll($final_json_array);
+        // $validator = Validator::make($validityCheckRows,$this->model->rules);
 
-        Storage::disk('local')->put("file.csv",$csv->getContent());
+        // if($validator->fails()) {
+        //     return $validator->messages()->getMessages();
+        // } else {
+            
+            
+        //     foreach(array_chunk($final_json_array,1000) as $t) {
+        //         $this->model::insert($t);
+        //     }
+    
+        //     return ["message" => "Successfully Inserted"];
 
-        $query = sprintf("LOAD DATA LOCAL INFILE '%s' INTO TABLE '%s' LINES TERMINATED BY '\\n' FIELDS TERMINATED BY ','", addslashes(storage_path("app/file.csv")),$this->model->getTable());
+        // }
+       // $i=0;
+        foreach(array_chunk($final_json_array,1000) as $t) {
+            
+            for($i=0;$i<1000;$i++) {
 
-        //$query = "LOAD DATA LOCAL INFILE '".addslashes(storage_path("app/file.csv"))."' INTO TABLE ".$this->model->getTable()." LINES TERMINATED BY '\\n' FIELDS TERMINATED BY ','";
+                $validator = Validator::make($t[$i],$this->model->rules);
+
+                if($validator->fails()) 
+                    return $validator->messages()->getMessages();
+                else {
+                    $this->model::insert($t[$i]);
+                    
+                }
+
+            } //for
+            
+        } //foreach
+
         
-        dd($query);
-        //dd(DB::connection()->getpdo()->exec($query));
-
-        return DB::connection()->getpdo()->exec($query);
-
+        return ["message" => "Successfully Inserted"];
+        
     }
 
 
