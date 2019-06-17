@@ -1,8 +1,7 @@
 {
     "name": "ladybird/import",
     "require": {
-        "league/csv": "^9.2",
-        "flynsarmy/csv-seeder": "^1.0"
+       
     },
     "autoload": {
         "psr-4": {
